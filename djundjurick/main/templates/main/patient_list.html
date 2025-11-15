@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список пациентов</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        .patient-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .patient-table th, .patient-table td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        .patient-table th { background-color: #f8f9fa; }
+        .urgency-1 { background-color: #ffcccc; }
+        .urgency-2 { background-color: #ffe6cc; }
+        .urgency-3 { background-color: #ffffcc; }
+        .urgency-4 { background-color: #e6ffe6; }
+        .filters { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .empty-message { text-align: center; padding: 40px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="{% url 'index' %}">🏠 Главная</a>
+            <a href="{% url 'patient-list' %}">📋 Все пациенты</a>
+        </div>
+
+        <h1>📋 Библиотека карт пациентов</h1>
+
+        <div class="filters">
+            <form method="get">
+                <select name="urgency">
+                    <option value="">Все уровни срочности</option>
+                    <option value="1" {% if request.GET.urgency == '1' %}selected{% endif %}>🔴 Уровень 1</option>
+                    <option value="2" {% if request.GET.urgency == '2' %}selected{% endif %}>🟠 Уровень 2</option>
+                    <option value="3" {% if request.GET.urgency == '3' %}selected{% endif %}>🟡 Уровень 3</option>
+                    <option value="4" {% if request.GET.urgency == '4' %}selected{% endif %}>🟢 Уровень 4</option>
+                </select>
+                <button type="submit">Фильтровать</button>
+                <a href="{% url 'patient-list' %}">Сбросить</a>
+            </form>
+        </div>
+
+        <table class="patient-table">
+            <thead>
+                <tr>
+                    <th>ID пациента</th>
+                    <th>Уровень срочности</th>
+                    <th>Диагноз</th>
+                    <th>Маршрут</th>
+                    <th>Дата создания</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr class="urgency-{{ patient.urgency_level }}">
+                    <td><strong>{{ patient.encrypted_id }}</strong></td>
+                    <td>{{ patient.get_urgency_display }}</td>
+                    <td>{{ patient.diagnosis|default:"-"|truncatewords:8 }}</td>
+                    <td>
+                        {% if patient.clinical_route.current_department %}
+                            {{ patient.clinical_route.current_department }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ patient.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if patient.is_active %}
+                            <span style="color: green;">● Активен</span>
+                        {% else %}
+                            <span style="color: red;">● Неактивен</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-message">
+                        Пациенты не найдены
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 20px;">
+            <p>Всего пациентов: {{ patients.count }}</p>
+        </div>
+    </div>
+</body>
+</html>
