@@ -6,7 +6,9 @@ from .models import Patient
 
 def index(request):
     return render(request, 'main/main.html')
-
+def patient_detail(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    return render(request, 'main/patient_detail.html', {'patient': patient})
 
 class PatientListView(ListView):
     model = Patient
@@ -35,6 +37,6 @@ def patient_detail(request, patient_id):
 
     context = {
         'patient': patient,
-        'visits': patient.visits.all().order_by('-visit_date')
+        'visits': patient.get_visits()
     }
     return render(request, 'main/patient_detail.html', context)

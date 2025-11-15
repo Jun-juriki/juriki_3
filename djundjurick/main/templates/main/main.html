@@ -1,21 +1,7 @@
-<!doctype html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>main string</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-        <h5 class="my-0 mr-md-auto front-weight-normal">третье мнение - гарант качества и гениальность</h5>
-        <nav class="my-2 mr-md-0 mr-md-3">
-            <a href="{% url 'patient-list' %}">📋 Все пациенты</a>
-        </nav>
-
-    </div>
-    <h1>добро пожаловать</h1>
-</body>
-</html>
+{% extends 'main/head.html' %}
+{% block title %}
+Главная
+{% endblock %}
+{% block content %}
+    <h1>Добро пожаловать</h1>
+{% endblock %}
