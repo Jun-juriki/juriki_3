@@ -1,0 +1,64 @@
+{% extends 'main/head.html' %}
+{% block title %}Вход для врачей{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow" style="border: none; border-radius: 15px;">
+                <div class="card-header text-center" style="background: linear-gradient(135deg, #ffb6c1, #ff69b4); border: none; border-radius: 15px 15px 0 0; padding: 20px;">
+                    <h4 class="mb-0" style="color: white;">👨‍⚕️ Вход для врачей</h4>
+                </div>
+                <div class="card-body" style="padding: 30px;">
+                    <p class="text-center mb-4" style="color: #d63384;">
+                        Для доступа к системе используйте логин и пароль, выданные администратором
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label" style="color: #d63384; font-weight: 500;">Логин</label>
+                            {{ form.username }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label" style="color: #d63384; font-weight: 500;">Пароль</label>
+                            {{ form.password }}
+                        </div>
+
+                        <button type="submit" class="btn w-100 py-2" style="background: linear-gradient(135deg, #ffb6c1, #ff69b4); border: none; color: white; font-weight: 500; border-radius: 10px; transition: all 0.3s ease;">
+                            🔐 Войти в систему
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="small" style="color: #ff69b4;">
+                            Если у вас нет доступа, обратитесь к администратору системы
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#id_username, #id_password {
+    border: 2px solid #ffebf3;
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+#id_username:focus, #id_password:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3);
+}
+</style>
+{% endblock %}

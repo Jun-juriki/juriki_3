@@ -3,12 +3,29 @@ from django.db import models
 
 
 class Doctor(AbstractUser):
+    # Указываем уникальные related_name чтобы избежать конфликтов
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name='doctor_set',  # Уникальный related_name
+        related_query_name='doctor',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='doctor_set',  # Уникальный related_name
+        related_query_name='doctor',
+    )
 
     specialization = models.CharField(
         max_length=100,
-        verbose_name="Специализация"
+        verbose_name="Специализация",
+        help_text="Например: Кардиолог, Невролог, Терапевт"
     )
-
 
     department_name = models.CharField(
         max_length=150,
@@ -17,11 +34,9 @@ class Doctor(AbstractUser):
 
     department_code = models.CharField(
         max_length=20,
-        verbose_name="Код отделения",
-        help_text="Внутренний код отделения"
+        verbose_name="Код отделения"
     )
 
-    # Контактная информация
     phone = models.CharField(
         max_length=20,
         blank=True,
@@ -34,18 +49,11 @@ class Doctor(AbstractUser):
         verbose_name="Номер медицинской лицензии"
     )
 
-    # Статус врача
     is_verified = models.BooleanField(
-        default=False,
-        verbose_name="Верифицирован администратором"
-    )
-
-    is_active = models.BooleanField(
         default=True,
-        verbose_name="Активный сотрудник"
+        verbose_name="Верифицирован"
     )
 
-    # Дополнительные поля
     years_of_experience = models.IntegerField(
         default=0,
         verbose_name="Стаж работы (лет)"
@@ -53,14 +61,12 @@ class Doctor(AbstractUser):
 
     bio = models.TextField(
         blank=True,
-        verbose_name="О враче",
-        help_text="Краткая информация о специализации и опыте"
+        verbose_name="О враче"
     )
 
-    # Автоматические поля
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Дата регистрации"
+        verbose_name="Дата добавления"
     )
 
     updated_at = models.DateTimeField(
@@ -80,9 +86,5 @@ class Doctor(AbstractUser):
         return f"{self.username} - {self.specialization}"
 
     def get_short_info(self):
+        """Краткая информация о враче"""
         return f"{self.specialization} | {self.department_name}"
-
-    def save(self, *args, **kwargs):
-        if not self.email and self.username:
-            self.email = f"{self.username}@hospital.local"
-        super().save(*args, **kwargs)
