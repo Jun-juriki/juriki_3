@@ -2,7 +2,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 from .models import Patient
-
+from datetime import datetime, timedelta
+from django.contrib.auth.decorators import login_required
 
 def index(request):
     return render(request, 'main/main.html')
@@ -40,3 +41,29 @@ def patient_detail(request, patient_id):
         'visits': patient.get_visits()
     }
     return render(request, 'main/patient_detail.html', context)
+
+
+@login_required
+def queue_view(request):
+    """Страница очереди пациентов с расписанием"""
+    # Получаем активных пациентов, отсортированных по неотложности
+    patients = Patient.objects.filter(is_active=True).order_by('-emergency_criteria')
+
+    # Создаем расписание с 12:00 с интервалом 1 час
+    start_time = datetime.strptime('12:00', '%H:%M')
+    schedule = []
+
+    for i, patient in enumerate(patients):
+        appointment_time = (start_time + timedelta(hours=i)).strftime('%H:%M')
+        schedule.append({
+            'patient': patient,
+            'appointment_time': appointment_time,
+            'time_slot': i + 1  # номер временного слота
+        })
+
+    context = {
+        'schedule': schedule,
+        'total_patients': len(patients)
+    }
+
+    return render(request, 'main/queue.html', context)
