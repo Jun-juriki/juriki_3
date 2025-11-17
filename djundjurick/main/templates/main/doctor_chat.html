@@ -1,0 +1,231 @@
+{% extends 'main/head.html' %}
+{% block title %}Консультация с {{ specialist_info.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <div class="col-md-6 border-end p-0">
+            <div class="d-flex flex-column h-100">
+
+                <div class="chat-header p-3 border-bottom bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ specialist_info.icon }} Консультация с {{ specialist_info.name }}</h5>
+                            <small class="text-muted">🟢 онлайн</small>
+                        </div>
+                        <div>
+                            <a href="{% url 'patient-list' %}" class="btn btn-sm btn-outline-secondary">
+                                ← Назад к чатам
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="chat-messages flex-grow-1 p-3">
+                    {% for message in messages %}
+                    <div class="message {% if message.sender == 'current' %}current-message{% else %}specialist-message{% endif %}">
+                        <div class="message-content">
+                            <div class="message-text">{{ message.text }}</div>
+                            <div class="message-time">{{ message.time }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="chat-input p-3 border-top bg-white">
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" class="form-control" placeholder="Введите сообщение коллеге..." name="message">
+                        <button type="submit" class="btn btn-{{ specialist_info.color }}">
+                            🎤 Отправить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-6 p-0">
+            <div class="h-100 overflow-auto">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>📋 Карта пациента</h4>
+                        <a href="{% url 'patient-detail' patient.id %}" class="btn btn-outline-primary">
+                            📖 Полная карта
+                        </a>
+                    </div>
+
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">👤 Основная информация</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>ID пациента:</strong><br>{{ patient.encrypted_id }}</p>
+                                    <p><strong>Имя:</strong><br>{{ patient.encrypted_name }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Статус:</strong><br>
+                                        {% if patient.is_active %}
+                                            <span class="badge bg-success">Активен</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Неактивен</span>
+                                        {% endif %}
+                                    </p>
+                                    <p><strong>Создан:</strong><br>{{ patient.created_at|date:"d.m.Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">🏥 Медицинская информация</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if patient.diagnosis %}
+                            <p><strong>Диагноз:</strong><br>{{ patient.diagnosis }}</p>
+                            {% endif %}
+
+                            {% if patient.icd10_codes %}
+                            <p><strong>Коды МКБ-10:</strong><br>{{ patient.icd10_codes }}</p>
+                            {% endif %}
+
+                            {% if patient.hilling_doc %}
+                            <p><strong>Лечащий врач:</strong><br>{{ patient.hilling_doc }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">🎯 Приоритеты и срочность</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Уровень срочности:</strong>
+                                <span class="badge {% if patient.urgency_level == 1 %}bg-danger{% elif patient.urgency_level == 2 %}bg-warning{% elif patient.urgency_level == 3 %}bg-info{% else %}bg-success{% endif %} float-end">
+                                    {{ patient.get_urgency_display }}
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong>Критерий неотложности:</strong>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar {{ patient.get_emergency_progress_class }}"
+                                         style="width: {{ patient.emergency_criteria }}%">
+                                        {{ patient.emergency_criteria }}/100
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ patient.get_emergency_display }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">📅 История визитов</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if patient.get_visits_count > 0 %}
+                                <p>Всего визитов: <strong>{{ patient.get_visits_count }}</strong></p>
+                                {% with last_visit=patient.get_last_visit %}
+                                    {% if last_visit %}
+                                    <p>Последний визит: <strong>{{ last_visit.visit_date|slice:":10" }}</strong></p>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <p class="text-muted">Визиты не записаны</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-messages {
+    background: #f8f9fa;
+    min-height: 400px;
+    max-height: 60vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+}
+
+.message {
+    display: flex;
+    max-width: 80%;
+}
+
+.current-message {
+    align-self: flex-end;
+}
+
+.specialist-message {
+    align-self: flex-start;
+}
+
+.message-content {
+    padding: 12px 16px;
+    border-radius: 18px;
+    position: relative;
+}
+
+.current-message .message-content {
+    background: #007bff;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.specialist-message .message-content {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.chat-input {
+    background: white;
+}
+
+.h-100 {
+    height: calc(100vh - 140px) !important;
+}
+
+/* Очистка float */
+.chat-messages::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media (max-width: 768px) {
+    .h-100 {
+        height: auto !important;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+}
+</style>
+{% endblock %}

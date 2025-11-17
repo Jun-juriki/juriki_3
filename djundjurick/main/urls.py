@@ -5,5 +5,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('patients/', views.PatientListView.as_view(), name='patient-list'),
     path('patients/<str:patient_id>/', views.patient_detail, name='patient-detail'),
-    path('queue/', views.queue_view, name='queue')
+    path('queue/', views.queue_view, name='queue'),
+    path('chat/doctor/<str:specialist>/', views.doctor_chat, name='doctor-chat')
 ]
